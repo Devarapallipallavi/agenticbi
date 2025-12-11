@@ -1,4 +1,4 @@
-name: Build and deploy React App to Azure Web App - agenticbiapp
+name: Build and deploy Vite React App to Azure Web App - agenticbiapp
 
 on:
   push:
@@ -18,22 +18,25 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # React CRA/Vite support Node 18/20
+          node-version: '20' # recommended for Vite
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build React App
+      - name: Build Vite app
         run: npm run build
 
-      - name: Zip build folder
-        run: zip -r build.zip build
+      - name: Verify dist directory
+        run: ls -R dist
+
+      - name: Zip dist folder
+        run: zip -r dist.zip dist
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: react-build
-          path: build.zip
+          name: vite-dist
+          path: dist.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,7 +46,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: react-build
+          name: vite-dist
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -51,4 +54,4 @@ jobs:
           app-name: 'agenticbiapp'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9CDE991899EC4DA4B685B7A3B63F9A33 }}
-          package: build.zip
+          package: dist.zip
